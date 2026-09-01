@@ -1,0 +1,41 @@
+from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    app_name: str = "Voice AI Patient Registration"
+    app_env: str = "development"
+    api_host: str = "0.0.0.0"
+    api_port: int = 8000
+    public_base_url: str = "http://localhost:8000"
+
+    mysql_host: str = "localhost"
+    mysql_port: int = 3306
+    mysql_user: str = "root"
+    mysql_password: str = ""
+    mysql_database: str = "voice_ai"
+
+    groq_api_key: str = ""
+    vapi_api_key: str = ""
+    vapi_phone_number: str = ""
+    vapi_assistant_id: str = ""
+    vapi_server_secret: str = ""
+
+    @property
+    def sqlalchemy_url(self) -> str:
+        from urllib.parse import quote_plus
+
+        password = quote_plus(self.mysql_password)
+        return (
+            f"mysql+pymysql://{self.mysql_user}:{password}"
+            f"@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
+            "?charset=utf8mb4"
+        )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

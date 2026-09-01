@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Northstar Intake Portal</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark">N</div>
+        <div>
+          <strong>Northstar Health</strong>
+          <span>Voice intake portal</span>
+        </div>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-view="overview">Overview</button>
+        <button class="nav-btn" data-view="patients">Patients</button>
+        <button class="nav-btn" data-view="calls">Call activity</button>
+      </nav>
+      <div class="sidebar-foot">
+        <p>Live MySQL · FastAPI · Vapi</p>
+        <p id="phone-label">US line pending</p>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">Registration overview</h1>
+          <p id="page-subtitle">Patient demographics collected by the voice agent and this portal.</p>
+        </div>
+        <div class="top-actions">
+          <span id="api-status" class="pill">Checking API</span>
+          <button id="add-btn" class="primary">Add patient</button>
+        </div>
+      </header>
+
+      <section id="view-overview" class="view">
+        <div class="kpis" id="kpis"></div>
+        <div class="chart-grid">
+          <article class="panel wide">
+            <h2>Registrations · last 30 days</h2>
+            <canvas id="chart-trend"></canvas>
+          </article>
+          <article class="panel">
+            <h2>Patients by state</h2>
+            <canvas id="chart-state"></canvas>
+          </article>
+          <article class="panel">
+            <h2>Sex</h2>
+            <canvas id="chart-sex"></canvas>
+          </article>
+          <article class="panel">
+            <h2>Insurance mix</h2>
+            <canvas id="chart-insurance"></canvas>
+          </article>
+          <article class="panel">
+            <h2>Preferred language</h2>
+            <canvas id="chart-language"></canvas>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-patients" class="view hidden">
+        <article class="panel">
+          <div class="filters">
+            <input id="q-last" placeholder="Last name" />
+            <input id="q-dob" placeholder="DOB MM/DD/YYYY" />
+            <input id="q-phone" placeholder="Phone" />
+            <button id="search-btn">Search</button>
+            <button id="reset-btn" class="ghost">Reset</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>DOB</th>
+                  <th>Sex</th>
+                  <th>Phone</th>
+                  <th>City / State</th>
+                  <th>Insurance</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="patient-rows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-calls" class="view hidden">
+        <article class="panel">
+          <h2>Recent voice calls</h2>
+          <div id="call-rows" class="call-list">No call transcripts yet. They appear after the Vapi agent is live.</div>
+        </article>
+      </section>
+    </main>
+
+    <aside id="drawer" class="drawer hidden">
+      <button class="close" id="close-drawer">×</button>
+      <div id="drawer-body"></div>
+    </aside>
+
+    <div id="modal" class="modal hidden">
+      <form id="patient-form" class="modal-card">
+        <h2>Add patient</h2>
+        <p>Uses the same <code>POST /patients</code> path as the voice agent.</p>
+        <div class="form-grid">
+          <label>First name<input name="first_name" required /></label>
+          <label>Last name<input name="last_name" required /></label>
+          <label>Date of birth<input name="date_of_birth" placeholder="MM/DD/YYYY" required /></label>
+          <label>Sex
+            <select name="sex" required>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+              <option>Decline to Answer</option>
+            </select>
+          </label>
+          <label>Phone<input name="phone_number" required /></label>
+          <label>Email<input name="email" /></label>
+          <label class="span-2">Address line 1<input name="address_line_1" required /></label>
+          <label>Address line 2<input name="address_line_2" /></label>
+          <label>City<input name="city" required /></label>
+          <label>State<input name="state" maxlength="2" required /></label>
+          <label>ZIP<input name="zip_code" required /></label>
+          <label>Insurance<input name="insurance_provider" /></label>
+          <label>Member ID<input name="insurance_member_id" /></label>
+          <label>Language<input name="preferred_language" value="English" /></label>
+          <label>Emergency name<input name="emergency_contact_name" /></label>
+          <label>Emergency phone<input name="emergency_contact_phone" /></label>
+        </div>
+        <p id="form-error" class="error"></p>
+        <div class="modal-actions">
+          <button type="button" class="ghost" id="cancel-add">Cancel</button>
+          <button type="submit" class="primary">Save patient</button>
+        </div>
+      </form>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
