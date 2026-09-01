@@ -1,7 +1,8 @@
-"""Patch the live Vapi assistant with the current prompt and branding."""
+"""Patch the live Vapi assistant with the current prompt, branding, and server URL."""
 
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -21,6 +22,13 @@ FIRST_MESSAGE = (
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--server-url",
+        default="https://saadmasoodd22.pythonanywhere.com",
+        help="Public API base URL, no trailing slash",
+    )
+    args = parser.parse_args()
     settings = get_settings()
     assistant_id = settings.vapi_assistant_id
     if not assistant_id:
@@ -28,6 +36,12 @@ def main() -> None:
     headers = {
         "Authorization": f"Bearer {settings.vapi_api_key}",
         "Content-Type": "application/json",
+    }
+    base = args.server_url.rstrip("/")
+    server = {
+        "url": f"{base}/vapi/tools",
+        "secret": settings.vapi_server_secret,
+        "timeoutSeconds": 20,
     }
     with httpx.Client(timeout=30) as client:
         current = client.get(f"{API}/assistant/{assistant_id}", headers=headers)
@@ -40,15 +54,19 @@ def main() -> None:
         else:
             messages = [{"role": "system", "content": PROMPT}]
         model["messages"] = messages
+        for tool in model.get("tools") or []:
+            if isinstance(tool, dict) and tool.get("type") == "function":
+                tool["server"] = server
         patch = {
             "name": "Cloud Care Patient Intake",
             "firstMessage": FIRST_MESSAGE,
             "model": model,
             "voice": {"provider": "vapi", "voiceId": "Elliot"},
+            "serverUrl": f"{base}/vapi/end-call",
         }
         updated = client.patch(f"{API}/assistant/{assistant_id}", headers=headers, json=patch)
         updated.raise_for_status()
-        print("updated", assistant_id, updated.json().get("name"))
+        print("updated", assistant_id, updated.json().get("name"), "server", base)
 
 
 if __name__ == "__main__":

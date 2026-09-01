@@ -27,7 +27,22 @@ class Settings(BaseSettings):
 
     @property
     def sqlalchemy_url(self) -> str:
+        import os
         from urllib.parse import quote_plus
+
+        # PythonAnywhere free accounts have no MySQL. Never try localhost MySQL there
+        # or the web worker hangs until the browser times out (error log stays empty).
+        on_pythonanywhere = bool(
+            os.getenv("PYTHONANYWHERE_DOMAIN")
+            or os.getenv("PYTHONANYWHERE_SITE")
+            or os.path.isdir("/home/saadmasoodd22")
+        )
+        pa_sqlite = "sqlite:////home/saadmasoodd22/voice-ai-patient-agent/voice_ai.db"
+        if on_pythonanywhere:
+            explicit = (os.getenv("DATABASE_URL") or self.database_url or "").strip()
+            if explicit.startswith("sqlite"):
+                return explicit
+            return pa_sqlite
 
         if self.database_url:
             url = self.database_url.strip()
@@ -37,14 +52,14 @@ class Settings(BaseSettings):
                 url = "postgresql+psycopg2://" + url[len("postgresql://") :]
             return url
 
-        if self.app_env == "pythonanywhere":
-            return "sqlite:////home/saadmasoodd22/voice-ai-patient-agent/voice_ai.db"
+        if (self.app_env or "").lower() == "pythonanywhere":
+            return pa_sqlite
 
         password = quote_plus(self.mysql_password)
         return (
             f"mysql+pymysql://{self.mysql_user}:{password}"
             f"@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
-            "?charset=utf8mb4"
+            "?charset=utf8mb4&connect_timeout=5"
         )
 
 

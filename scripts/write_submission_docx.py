@@ -54,10 +54,10 @@ def document_xml() -> str:
         p("US phone number to call", heading=3),
         p("+1 (860) 410-8127"),
         p("API base URL", heading=3),
-        p("https://hastiness-rebate-doorpost.ngrok-free.dev"),
+        p("https://saadmasoodd22.pythonanywhere.com"),
         p("Dashboard", heading=3),
-        p("https://hastiness-rebate-doorpost.ngrok-free.dev"),
-        p("Same host as the API. Open in a browser. If ngrok shows a warning page, click “Visit Site” once."),
+        p("https://saadmasoodd22.pythonanywhere.com"),
+        p("Same host as the API. Open in a browser. No login."),
         p("Credentials", heading=3),
         p("None. The dashboard and REST API are open for this demo. No login, no API key, no VPN."),
         p("How to test (about 5 minutes)", heading=2),
@@ -65,10 +65,10 @@ def document_xml() -> str:
         p("2. Register a fake patient in natural speech. The agent will confirm details before saving."),
         p("3. Open the dashboard URL and confirm the new row appears in Patients (and on the charts)."),
         p("4. Optional API checks (browser or curl):"),
-        p("   GET https://hastiness-rebate-doorpost.ngrok-free.dev/health"),
-        p("   GET https://hastiness-rebate-doorpost.ngrok-free.dev/patients"),
-        p("   GET https://hastiness-rebate-doorpost.ngrok-free.dev/patients?last_name=Doe"),
-        p("   GET https://hastiness-rebate-doorpost.ngrok-free.dev/docs  (interactive API docs)"),
+        p("   GET https://saadmasoodd22.pythonanywhere.com/health"),
+        p("   GET https://saadmasoodd22.pythonanywhere.com/patients"),
+        p("   GET https://saadmasoodd22.pythonanywhere.com/patients?last_name=Doe"),
+        p("   GET https://saadmasoodd22.pythonanywhere.com/stats"),
         p("Notes for reviewers", heading=2),
         p(
             "I am based in Pakistan, so I cannot place a normal outbound call to a US number from here. "
@@ -88,16 +88,16 @@ def document_xml() -> str:
         ),
         p("What you should NOT need to do", heading=2),
         p("Do not clone the repo unless you want to read the code."),
-        p("Do not install Python, MySQL, Docker, or ngrok."),
+        p("Do not install Python, MySQL, Docker, or any tunnel."),
         p("Do not create cloud accounts or set environment variables."),
         p("Candidate note (not a reviewer task)", heading=2),
         p(
-            "The public URL is an ngrok tunnel in front of the FastAPI + MySQL instance on my machine. "
-            "I will keep the laptop, MySQL, API, and ngrok running during the review window so the number "
-            "and dashboard stay live. If the ngrok URL ever changes, I will send an updated link."
+            "The public URL is hosted on PythonAnywhere so the dashboard and voice tools stay up without this laptop. "
+            "Live storage is SQLite (free PythonAnywhere accounts do not include MySQL). "
+            "Local MySQL on my machine is only for development."
         ),
         p("Stack (for context)", heading=2),
-        p("Voice: Vapi US number + Groq LLM. Backend: Python FastAPI. Database: MySQL 8. Dashboard: Chart.js portal served by the same API."),
+        p("Voice: Vapi US number + Groq LLM. Live API: Python WSGI on PythonAnywhere. Local API: FastAPI + MySQL 8. Dashboard: Chart.js portal served by the same API."),
         p("Agent name: Saad. Clinic name: Cloud Care Health. The PDF did not require a clinic or agent name."),
     ]
     inner = "".join(blocks)
@@ -109,13 +109,18 @@ def document_xml() -> str:
 
 
 def main() -> None:
-    OUT.unlink(missing_ok=True)
-    with zipfile.ZipFile(OUT, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    out = OUT
+    try:
+        out.unlink(missing_ok=True)
+    except PermissionError:
+        out = OUT.with_name("Cloud Care Health - Reviewer Notes - live.docx")
+        print("original docx is open; writing", out)
+    with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("[Content_Types].xml", CONTENT_TYPES)
         zf.writestr("_rels/.rels", RELS)
         zf.writestr("word/_rels/document.xml.rels", DOC_RELS)
         zf.writestr("word/document.xml", document_xml())
-    print(OUT)
+    print(out)
 
 
 if __name__ == "__main__":

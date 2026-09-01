@@ -11,8 +11,7 @@ from app.models import CallLog, Patient
 router = APIRouter(prefix="/stats", tags=["stats"])
 
 
-@router.get("")
-def get_stats(db: Session = Depends(get_db)):
+def collect_stats(db: Session) -> dict:
     active = db.query(Patient).filter(Patient.deleted_at.is_(None))
     total = active.count()
     with_insurance = active.filter(Patient.insurance_provider.isnot(None)).count()
@@ -47,31 +46,34 @@ def get_stats(db: Session = Depends(get_db)):
         db.query(CallLog).order_by(CallLog.created_at.desc()).limit(10).all()
     )
 
-    return ok(
-        {
-            "kpis": {
-                "total_patients": total,
-                "new_this_week": new_this_week,
-                "with_insurance": with_insurance,
-                "with_emergency_contact": with_emergency,
-                "recent_calls": db.query(func.count(CallLog.id)).scalar() or 0,
-            },
-            "by_state": grouped(Patient.state),
-            "by_sex": grouped(Patient.sex),
-            "by_language": grouped(Patient.preferred_language),
-            "by_insurance": grouped(
-                case((Patient.insurance_provider.is_(None), "Uninsured / not provided"), else_=Patient.insurance_provider)
-            ),
-            "registrations": registrations,
-            "recent_calls": [
-                {
-                    "id": row.id,
-                    "patient_id": row.patient_id,
-                    "caller_number": row.caller_number,
-                    "outcome": row.outcome,
-                    "created_at": row.created_at.isoformat() if row.created_at else None,
-                }
-                for row in recent_calls
-            ],
-        }
-    )
+    return {
+        "kpis": {
+            "total_patients": total,
+            "new_this_week": new_this_week,
+            "with_insurance": with_insurance,
+            "with_emergency_contact": with_emergency,
+            "recent_calls": db.query(func.count(CallLog.id)).scalar() or 0,
+        },
+        "by_state": grouped(Patient.state),
+        "by_sex": grouped(Patient.sex),
+        "by_language": grouped(Patient.preferred_language),
+        "by_insurance": grouped(
+            case((Patient.insurance_provider.is_(None), "Uninsured / not provided"), else_=Patient.insurance_provider)
+        ),
+        "registrations": registrations,
+        "recent_calls": [
+            {
+                "id": row.id,
+                "patient_id": row.patient_id,
+                "caller_number": row.caller_number,
+                "outcome": row.outcome,
+                "created_at": row.created_at.isoformat() if row.created_at else None,
+            }
+            for row in recent_calls
+        ],
+    }
+
+
+@router.get("")
+def get_stats(db: Session = Depends(get_db)):
+    return ok(collect_stats(db))

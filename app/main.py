@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -24,6 +25,7 @@ logger = logging.getLogger("voice-agent")
 settings = get_settings()
 ROOT = Path(__file__).resolve().parent.parent
 FRONTEND = ROOT / "frontend"
+SKIP_LIFESPAN = os.getenv("SKIP_LIFESPAN") == "1"
 
 
 @asynccontextmanager
@@ -40,7 +42,11 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, version="1.0.0", lifespan=lifespan)
+app = FastAPI(
+    title=settings.app_name,
+    version="1.0.0",
+    lifespan=None if SKIP_LIFESPAN else lifespan,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -102,3 +108,12 @@ if FRONTEND.exists():
 @app.get("/")
 def dashboard():
     return FileResponse(FRONTEND / "index.html")
+
+
+if SKIP_LIFESPAN:
+    Base.metadata.create_all(bind=engine)
+    _db = SessionLocal()
+    try:
+        seed_patients(_db)
+    finally:
+        _db.close()

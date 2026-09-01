@@ -17,4 +17,5 @@ wallet/
 *.db
 *.sqlite
 *.sqlite3
+~$*
 

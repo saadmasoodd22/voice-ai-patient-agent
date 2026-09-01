@@ -1,8 +1,8 @@
 """Create the Vapi assistant and attach it to the US number.
 
-Run after the public API URL is known (ngrok or deployed host):
+Creates a new assistant. To retarget the existing one:
 
-    python scripts/setup_vapi.py --server-url https://xxxx.ngrok-free.app
+    python scripts/update_vapi_assistant.py --server-url https://saadmasoodd22.pythonanywhere.com
 """
 
 from __future__ import annotations

@@ -1,9 +1,9 @@
 # Voice AI Patient Registration
 # Cloud Care Health — take-home assessment
 
-Voice agent + REST API + MySQL + intake dashboard.
+Voice agent + REST API + intake dashboard.
 
-When a reviewer calls the US number, the agent collects patient demographics, confirms them, and saves through `POST /patients`. The portal reads the same MySQL database.
+When a reviewer calls the US number, the agent collects patient demographics, confirms them, and saves through `POST /patients`. The portal reads the same database.
 
 ## Live demo
 
@@ -11,19 +11,20 @@ When a reviewer calls the US number, the agent collects patient demographics, co
 |---|---|
 | Repository | https://github.com/saadmasoodd22/voice-ai-patient-agent |
 | US phone number | `+1 (860) 410-8127` |
-| API / dashboard | https://hastiness-rebate-doorpost.ngrok-free.dev (same URL). Local: `http://127.0.0.1:8000` |
+| API / dashboard | https://saadmasoodd22.pythonanywhere.com |
+| Local API | `http://127.0.0.1:8000` (MySQL on this machine) |
 | Test notes | Use **fake** demographics only. No HIPAA. No real patient data. Reviewers in the US can dial the number. I am in Pakistan and cannot place that US call myself. |
 
-If the laptop or ngrok restarts, follow `docs/HOME_TEST.md` and re-run `scripts/setup_vapi.py` with the new ngrok URL. The assistant itself is not edited unless a quiet voice test shows a bug.
+The live site stays up without this laptop. Voice tools and the dashboard both use that PythonAnywhere URL. A quiet voice test is in `docs/HOME_TEST.md`.
 
 ## Architecture
 
 ```
 Caller
   -> Vapi (US number, STT, TTS, Groq LLM, tools)
-      -> FastAPI /vapi/tools
+      -> API /vapi/tools
           -> same patient service as REST
-          -> MySQL 8 (`voice_ai`)
+          -> SQLite on PythonAnywhere (MySQL 8 locally)
       -> /vapi/end-call stores transcript
 
 Reviewer browser
@@ -35,9 +36,9 @@ Separation of concerns:
 
 - **Telephony / voice** — Vapi. We did not build STT/TTS.
 - **Conversation policy** — `prompts/system_prompt.md`
-- **HTTP + validation** — FastAPI / Pydantic
-- **Persistence** — MySQL `patients` + `call_logs`
-- **Portal** — static HTML/CSS/JS served by FastAPI
+- **HTTP + validation** — FastAPI / Pydantic locally; sync WSGI on PythonAnywhere
+- **Persistence** — SQLite on the live host; MySQL 8 `voice_ai` on this laptop (DBeaver)
+- **Portal** — static HTML/CSS/JS served by the same API
 
 The voice agent never writes SQL. It only calls tools that hit the API service layer.
 
@@ -47,12 +48,13 @@ The voice agent never writes SQL. It only calls tools that hit the API service l
 |---|---|---|
 | Voice | Vapi + free US number | Fastest path to a real inbound number; recommended by the brief |
 | LLM | Groq (`llama-3.3-70b-versatile`) | Free API, low latency for voice |
-| API | Python FastAPI | Clear validation, OpenAPI, quick to ship |
-| DB | MySQL 8 Community (local) | Free, no cloud card, DBeaver-friendly, listed in the brief |
+| API | Python FastAPI locally; sync WSGI on PythonAnywhere | FastAPI + a2wsgi hangs on PA’s free WSGI workers |
+| DB (live) | SQLite on PythonAnywhere | Free PA accounts have no MySQL/Postgres |
+| DB (local) | MySQL 8 Community | DBeaver-friendly; listed in the brief |
 | Dashboard | Vanilla JS + Chart.js | No extra frontend host; charts read `/stats` |
-| Tunnel | ngrok (free) | Makes localhost reachable for Vapi tool calls |
+| Host | PythonAnywhere (free) | Public HTTPS URL, no card, laptop can sleep |
 
-Oracle Cloud Always Free was considered; it requires a card for identity. Docker Oracle Free needs Windows virtualization/WSL, which this machine did not have. MySQL Community on Windows is the free path that actually runs.
+Oracle Cloud and Render asked for a card. Docker needed Windows virtualization this machine does not have. PythonAnywhere beginner hosting is the free path that stays online.
 
 ## Patient model
 
@@ -98,19 +100,13 @@ DBeaver: new connection `voice-ai-mysql` → `localhost:3306` / database `voice_
 
 ## Public URL for Vapi
 
-Vapi tools cannot call `localhost`. In a second terminal:
+Live tools already point at PythonAnywhere:
 
 ```bash
-ngrok http 8000
+python scripts/update_vapi_assistant.py --server-url https://saadmasoodd22.pythonanywhere.com
 ```
 
-Then:
-
-```bash
-python scripts/setup_vapi.py --server-url https://YOUR-NGROK-URL
-```
-
-Keep the API process and ngrok running while reviewers call.
+Local-only development still uses `uvicorn app.main:app` and MySQL. Do not point Vapi back at localhost.
 
 ## Environment variables
 
@@ -118,7 +114,9 @@ See `.env.example`. Never commit `.env`. Keys stay on the machine that runs the 
 
 ## Known limitations / trade-offs
 
-- The MySQL instance is local. The laptop (or a tunnel) must be on during review.
+- PythonAnywhere free web apps expire about once a month until **Run until 1 month from today** is clicked again.
+- Live data is SQLite on PA; local DBeaver MySQL is a separate copy.
+- `/docs` (Swagger) is served by local FastAPI only. On PA use `/health`, `/patients`, and `/stats`.
 - Vapi free US numbers are inbound US-national. Outbound from that free number is limited.
 - Groq + Vapi usage consumes Vapi credits (this account started with a small balance).
 - Dashboard has no login. Fine for a time-boxed demo; not for real PHI.
@@ -127,7 +125,7 @@ See `.env.example`. Never commit `.env`. Keys stay on the machine that runs the 
 
 ## What I would do next
 
-- Move MySQL to a free hosted instance so the laptop can sleep.
+- Keep the PythonAnywhere site renewed each month until review is done.
 - Add more Vapi credits before a live review window.
 - Expand tests around Vapi tool payloads.
 - Add webhook signature verification beyond the shared secret header.
