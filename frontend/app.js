@@ -233,9 +233,14 @@ function formatUsPhone(value) {
 
 async function boot() {
   try {
-    const info = await fetchEnvelope("/meta");
-    phoneLabel.textContent = formatUsPhone(info.phone_number);
+    await fetchEnvelope("/health");
     qs("api-status").textContent = "API connected";
+    try {
+      const info = await fetchEnvelope("/meta");
+      phoneLabel.textContent = formatUsPhone(info.phone_number);
+    } catch (_err) {
+      phoneLabel.textContent = "Call +1 (860) 410-8127";
+    }
     await loadOverview();
     await loadPatients();
   } catch (err) {
