@@ -1,4 +1,4 @@
--- Northstar patient registry (MySQL 8)
+-- Cloud Care Health patient registry (MySQL 8)
 -- Safe to run on the voice_ai database only.
 
 CREATE DATABASE IF NOT EXISTS voice_ai

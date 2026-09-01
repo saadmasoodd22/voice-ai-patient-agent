@@ -25,7 +25,7 @@ ngrok http 8000
 python scripts/setup_vapi.py --server-url https://YOUR-NEW-NGROK-URL
 ```
 
-7. Test with **Talk** in the Vapi dashboard (Assistants → Northstar Patient Intake → Talk), using fake names only.
+7. Test with **Talk** in the Vapi dashboard (Assistants → Cloud Care Patient Intake → Talk), using fake names only.
 8. Confirm the new patient on `http://127.0.0.1:8000` or the ngrok URL.
 
 Do not change the system prompt unless the quiet test shows a real problem.

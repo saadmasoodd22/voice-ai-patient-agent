@@ -1,5 +1,5 @@
 # Voice AI Patient Registration
-# Northstar Health — take-home assessment
+# Cloud Care Health — take-home assessment
 
 Voice agent + REST API + MySQL + intake dashboard.
 
@@ -11,8 +11,8 @@ When a reviewer calls the US number, the agent collects patient demographics, co
 |---|---|
 | Repository | https://github.com/saadmasoodd22/voice-ai-patient-agent |
 | US phone number | `+1 (860) 410-8127` |
-| API / dashboard | ngrok URL (changes if ngrok restarts). Local: `http://127.0.0.1:8000` |
-| Test notes | Use **fake** demographics only. No HIPAA. No real patient data. From outside the US, use Vapi **Talk** (web call) instead of dialing. |
+| API / dashboard | https://hastiness-rebate-doorpost.ngrok-free.dev (same URL). Local: `http://127.0.0.1:8000` |
+| Test notes | Use **fake** demographics only. No HIPAA. No real patient data. Reviewers in the US can dial the number. I am in Pakistan and cannot place that US call myself. |
 
 If the laptop or ngrok restarts, follow `docs/HOME_TEST.md` and re-run `scripts/setup_vapi.py` with the new ngrok URL. The assistant itself is not edited unless a quiet voice test shows a bug.
 

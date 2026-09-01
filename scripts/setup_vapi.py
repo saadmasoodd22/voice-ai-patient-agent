@@ -113,8 +113,8 @@ def main() -> None:
     ]
 
     assistant = {
-        "name": "Northstar Patient Intake",
-        "firstMessage": "Hi, you've reached Northstar Health patient registration. I'm Maya. I can get you set up in a few minutes. What is your first name?",
+        "name": "Cloud Care Patient Intake",
+        "firstMessage": "Hi, you've reached Cloud Care Health patient registration. I'm Saad. I can get you set up in a few minutes. What is your first name?",
         "model": {
             "provider": "groq",
             "model": "llama-3.3-70b-versatile",
@@ -122,7 +122,7 @@ def main() -> None:
             "messages": [{"role": "system", "content": PROMPT}],
             "tools": tools,
         },
-        "voice": {"provider": "vapi", "voiceId": "Savannah"},
+        "voice": {"provider": "vapi", "voiceId": "Elliot"},
         "transcriber": {"provider": "deepgram", "model": "nova-2", "language": "en"},
         "endCallPhrases": ["goodbye", "that's all", "you're all set"],
         "serverUrl": f"{args.server_url.rstrip('/')}/vapi/end-call",
