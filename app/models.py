@@ -1,8 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import CHAR, Date, DateTime, Index, String, Text, func
-from sqlalchemy.dialects.mysql import JSON
+from sqlalchemy import JSON, CHAR, Date, DateTime, Index, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base

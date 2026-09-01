@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: cloud-care-health
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.9"
+      - key: APP_NAME
+        value: Cloud Care Health Patient Registration
+      - key: VAPI_PHONE_NUMBER
+        value: "+18604108127"
+      - key: DATABASE_URL
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: VAPI_API_KEY
+        sync: false
+      - key: VAPI_ASSISTANT_ID
+        sync: false
+      - key: VAPI_SERVER_SECRET
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false

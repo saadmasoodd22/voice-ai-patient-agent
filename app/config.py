@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     mysql_user: str = "root"
     mysql_password: str = ""
     mysql_database: str = "voice_ai"
+    database_url: str = ""
 
     groq_api_key: str = ""
     vapi_api_key: str = ""
@@ -27,6 +28,14 @@ class Settings(BaseSettings):
     @property
     def sqlalchemy_url(self) -> str:
         from urllib.parse import quote_plus
+
+        if self.database_url:
+            url = self.database_url.strip()
+            if url.startswith("postgres://"):
+                url = "postgresql+psycopg2://" + url[len("postgres://") :]
+            elif url.startswith("postgresql://") and "+psycopg2" not in url:
+                url = "postgresql+psycopg2://" + url[len("postgresql://") :]
+            return url
 
         password = quote_plus(self.mysql_password)
         return (
