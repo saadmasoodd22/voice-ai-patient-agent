@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 .venv/
 venv/
 __pycache__/
@@ -18,4 +20,9 @@ wallet/
 *.sqlite
 *.sqlite3
 ~$*
+Send Email.docx
+Send Email File.docx
+Send Email File - ready.docx
+Cloud Care Health - Reviewer Notes.docx
+scripts/write_send_email.py
 

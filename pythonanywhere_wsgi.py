@@ -1,8 +1,4 @@
-"""Copy this into PythonAnywhere Web → WSGI configuration file.
-
-It loads /home/saadmasoodd22/wsgi.py (uploaded to Files) and the cloned repo at
-/home/saadmasoodd22/voice-ai-patient-agent.
-"""
+"""PythonAnywhere Web → WSGI file. Loads /home/saadmasoodd22/wsgi.py."""
 
 import os
 import sys

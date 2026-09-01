@@ -30,8 +30,6 @@ class Settings(BaseSettings):
         import os
         from urllib.parse import quote_plus
 
-        # PythonAnywhere free accounts have no MySQL. Never try localhost MySQL there
-        # or the web worker hangs until the browser times out (error log stays empty).
         on_pythonanywhere = bool(
             os.getenv("PYTHONANYWHERE_DOMAIN")
             or os.getenv("PYTHONANYWHERE_SITE")

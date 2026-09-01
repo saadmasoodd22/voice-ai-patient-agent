@@ -1,4 +1,4 @@
-"""PythonAnywhere entry. Web tab WSGI file should import this module as `application`."""
+"""WSGI app for PythonAnywhere (sync). Local dev still uses uvicorn app.main:app."""
 
 from __future__ import annotations
 
