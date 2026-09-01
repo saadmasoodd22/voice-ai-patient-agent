@@ -37,6 +37,9 @@ class Settings(BaseSettings):
                 url = "postgresql+psycopg2://" + url[len("postgresql://") :]
             return url
 
+        if self.app_env == "pythonanywhere":
+            return "sqlite:////home/saadmasoodd22/voice-ai-patient-agent/voice_ai.db"
+
         password = quote_plus(self.mysql_password)
         return (
             f"mysql+pymysql://{self.mysql_user}:{password}"

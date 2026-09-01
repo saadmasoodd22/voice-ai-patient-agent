@@ -14,5 +14,7 @@ ngrok
 wallet/
 .DS_Store
 *.pdf
-~$*
+*.db
+*.sqlite
+*.sqlite3
 

@@ -1,7 +1,7 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
-from sqlalchemy import JSON, CHAR, Date, DateTime, Index, String, Text, func
+from sqlalchemy import JSON, CHAR, Date, DateTime, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -9,6 +9,10 @@ from app.database import Base
 
 def new_uuid() -> str:
     return str(uuid.uuid4())
+
+
+def utcnow() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class Patient(Base):
@@ -37,10 +41,8 @@ class Patient(Base):
     preferred_language: Mapped[str] = mapped_column(String(50), nullable=False, default="English")
     emergency_contact_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     emergency_contact_phone: Mapped[str | None] = mapped_column(String(10), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.utc_timestamp())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=func.utc_timestamp(), onupdate=func.utc_timestamp()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow, onupdate=utcnow)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
@@ -54,4 +56,4 @@ class CallLog(Base):
     transcript: Mapped[str | None] = mapped_column(Text, nullable=True)
     collected_payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     outcome: Mapped[str] = mapped_column(String(32), nullable=False, default="in_progress")
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.utc_timestamp())
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
